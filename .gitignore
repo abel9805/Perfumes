@@ -46,3 +46,38 @@ app.*.map.json
 
 # Local Flutter SDK clone (no subir al repo)
 /flutter/
+
+# VS Code local workspace settings
+.vscode/
+
+# Android local machine config
+/android/local.properties
+
+# iOS CocoaPods
+/ios/Pods/
+
+# Root Flutter generated folders/files
+/.dart_tool/
+/.flutter-plugins
+/.flutter-plugins-dependencies
+/.pub/
+/build/
+
+# Nested Flutter app inside vendedores_api
+/vendedores_api/vendedores_app/.dart_tool/
+/vendedores_api/vendedores_app/.flutter-plugins
+/vendedores_api/vendedores_app/.flutter-plugins-dependencies
+/vendedores_api/vendedores_app/.pub/
+/vendedores_api/vendedores_app/build/
+
+# Laravel API dependencies and secrets
+/vendedores_api/vendor/
+/vendedores_api/node_modules/
+/vendedores_api/.env
+
+# Laravel runtime artifacts
+/vendedores_api/storage/logs/*.log
+/vendedores_api/storage/framework/cache/data/*
+/vendedores_api/storage/framework/sessions/*
+/vendedores_api/storage/framework/testing/*
+/vendedores_api/storage/framework/views/*
