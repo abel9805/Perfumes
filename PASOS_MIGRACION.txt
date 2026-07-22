@@ -1,0 +1,42 @@
+Pasos para mover el proyecto a otro equipo
+
+1. Copiar toda la carpeta del proyecto.
+   - Ruta actual: C:\xampp\htdocs\Perfumes
+
+2. Instalar en el nuevo equipo:
+   - Flutter
+   - PHP 8.2+
+   - Composer
+   - XAMPP o MySQL + Apache
+
+3. Crear la base de datos MySQL:
+   - perfumes_vendedores
+
+4. Configurar Laravel:
+   - Ir a C:\xampp\htdocs\Perfumes\vendedores_api
+   - Ejecutar: composer install
+   - Ejecutar: php artisan key:generate
+   - Ajustar el archivo .env con la base de datos nueva
+   - Ejecutar: php artisan migrate --seed
+   - Ejecutar: php artisan serve --host=0.0.0.0 --port=8000
+
+5. Correr la app admin:
+   - Ir a C:\xampp\htdocs\Perfumes
+   - Ejecutar: flutter pub get
+   - Ejecutar: flutter run --dart-define=API_BASE_URL=http://IP_DEL_NUEVO_PC:8000/api
+
+6. Correr la app de vendedores:
+   - Ir a C:\xampp\htdocs\Perfumes\vendedores_api\vendedores_app
+   - Ejecutar: flutter pub get
+   - Ejecutar: flutter run --dart-define=API_BASE_URL=http://IP_DEL_NUEVO_PC:8000/api
+
+7. Si usas telefono fisico:
+   - Cambiar IP_DEL_NUEVO_PC por la IP real del equipo
+
+8. Si quieres conservar datos:
+   - Exportar e importar la base MySQL perfumes_vendedores
+   - O iniciar limpio con migrate --seed
+
+9. Datos demo de vendedor:
+   - usuario: vendedor.demo
+   - contraseña: 1234

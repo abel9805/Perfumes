@@ -1,0 +1,104 @@
+CAMBIO DE EQUIPO - PERFUMES (Windows)
+Fecha: 2026-06-23
+
+====================================================
+1) RESPALDO EN EQUIPO ACTUAL
+====================================================
+
+1.1 Respaldar proyecto
+- Copiar carpeta completa:
+  C:\xampp\htdocs\Perfumes
+
+Comando opcional (PowerShell):
+$origen = "C:\xampp\htdocs\Perfumes"
+$destino = "D:\backup\Perfumes_" + (Get-Date -Format "yyyyMMdd_HHmm")
+New-Item -ItemType Directory -Force -Path $destino | Out-Null
+Copy-Item $origen -Destination $destino -Recurse -Force
+
+1.2 Exportar base de datos MySQL
+- Reemplaza perfumes_db por tu nombre real de base.
+
+mysqldump -u root -p perfumes_db > "D:\backup\perfumes_db.sql"
+
+1.3 Guardar archivo .env de Laravel
+- Archivo:
+  C:\xampp\htdocs\Perfumes\vendedores_api\.env
+
+====================================================
+2) RESTAURAR EN EQUIPO NUEVO
+====================================================
+
+2.1 Copiar proyecto
+- Copia la carpeta Perfumes al nuevo:
+  C:\xampp\htdocs\Perfumes
+
+2.2 Crear e importar base de datos
+- Reemplaza perfumes_db por tu nombre real.
+
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS perfumes_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p perfumes_db < "D:\backup\perfumes_db.sql"
+
+====================================================
+3) LEVANTAR API LARAVEL
+====================================================
+
+cd C:\xampp\htdocs\Perfumes\vendedores_api
+composer install
+
+Si no existe .env:
+copy .env.example .env
+
+php artisan key:generate
+
+IMPORTANTE: Editar .env y validar:
+- DB_HOST
+- DB_PORT
+- DB_DATABASE
+- DB_USERNAME
+- DB_PASSWORD
+- APP_URL=http://TU_IP:8000
+
+php artisan migrate --force
+php artisan storage:link
+php artisan serve --host=0.0.0.0 --port=8000
+
+====================================================
+4) LEVANTAR APP ADMIN (Flutter)
+====================================================
+
+cd C:\xampp\htdocs\Perfumes
+flutter pub get
+flutter run -d R5GL311JGVP --dart-define=API_BASE_URL=http://192.168.1.75:8000/api --dart-define=ADMIN_VENDEDOR_ID=1
+
+====================================================
+5) LEVANTAR APP VENDEDORES (Flutter)
+====================================================
+
+cd C:\xampp\htdocs\Perfumes\vendedores_api\vendedores_app
+flutter pub get
+flutter run -d R5GL311JGVP --dart-define=API_BASE_URL=http://TU_IP:8000/api
+
+====================================================
+6) PRUEBA RAPIDA DE API
+====================================================
+
+$base = "http://TU_IP:8000/api"
+Invoke-RestMethod -Uri "$base/admin/resumen" -Method Get | ConvertTo-Json
+
+====================================================
+7) NOTAS IMPORTANTES
+====================================================
+
+- Cambia TU_IP por la IP local del equipo nuevo (ipconfig).
+- Si cambia la red WiFi/LAN, cambia solo API_BASE_URL al ejecutar Flutter.
+- Si aparece aviso de symlinks en Flutter, activar Developer Mode:
+  start ms-settings:developers
+
+====================================================
+8) ORDEN RECOMENDADO DE ARRANQUE DIARIO
+====================================================
+
+1. Iniciar MySQL y Apache en XAMPP.
+2. Levantar API con php artisan serve.
+3. Ejecutar app admin.
+4. Ejecutar app vendedores.
