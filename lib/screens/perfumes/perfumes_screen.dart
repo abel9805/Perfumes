@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/app_mode.dart';
 import '../../database/database_helper.dart';
 import '../../models/perfume.dart';
 import '../../widgets/app_drawer.dart';
@@ -89,6 +90,7 @@ class _PerfumesScreenState extends State<PerfumesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isColega = AppModeConfig.isColega;
     return AdminBackHandler(
       dashboardBuilder: (_) => const HomeScreen(),
       child: Scaffold(
@@ -119,13 +121,15 @@ class _PerfumesScreenState extends State<PerfumesScreen> {
           ),
         ),
         drawer: const AppDrawer(),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _abrirFormulario(),
-          icon: const Icon(Icons.add),
-          label: const Text('Nuevo'),
-          backgroundColor: Colors.purple.shade700,
-          foregroundColor: Colors.white,
-        ),
+        floatingActionButton: isColega
+            ? null
+            : FloatingActionButton.extended(
+                onPressed: () => _abrirFormulario(),
+                icon: const Icon(Icons.add),
+                label: const Text('Nuevo'),
+                backgroundColor: Colors.purple.shade700,
+                foregroundColor: Colors.white,
+              ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _filtrados.isEmpty
@@ -202,6 +206,30 @@ class _PerfumesScreenState extends State<PerfumesScreen> {
                                       Text('Marca: ${p.marca}',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis),
+                                      if ((p.mililitros != null &&
+                                              p.mililitros! > 0) ||
+                                          (p.concentracion != null &&
+                                              p.concentracion!.isNotEmpty))
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 2),
+                                          child: Text(
+                                            [
+                                              if (p.mililitros != null &&
+                                                  p.mililitros! > 0)
+                                                '${p.mililitros} ml',
+                                              if (p.concentracion != null &&
+                                                  p.concentracion!.isNotEmpty)
+                                                p.concentracion!,
+                                            ].join(' • '),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                          ),
+                                        ),
                                       const SizedBox(height: 4),
                                       Text(
                                           'Costo: \$${p.precioCosto.toStringAsFixed(2)}'),
@@ -235,33 +263,39 @@ class _PerfumesScreenState extends State<PerfumesScreen> {
                                             ),
                                           ),
                                           const Spacer(),
-                                          PopupMenuButton(
-                                            itemBuilder: (_) => [
-                                              const PopupMenuItem(
-                                                  value: 'edit',
-                                                  child: Row(children: [
-                                                    Icon(Icons.edit, size: 18),
-                                                    SizedBox(width: 8),
-                                                    Text('Editar')
-                                                  ])),
-                                              const PopupMenuItem(
-                                                  value: 'delete',
-                                                  child: Row(children: [
-                                                    Icon(Icons.delete,
-                                                        size: 18,
-                                                        color: Colors.red),
-                                                    SizedBox(width: 8),
-                                                    Text('Eliminar',
-                                                        style: TextStyle(
-                                                            color: Colors.red))
-                                                  ])),
-                                            ],
-                                            onSelected: (v) {
-                                              if (v == 'edit')
-                                                _abrirFormulario(p);
-                                              if (v == 'delete') _delete(p);
-                                            },
-                                          ),
+                                          if (!isColega)
+                                            PopupMenuButton(
+                                              itemBuilder: (_) => [
+                                                const PopupMenuItem(
+                                                    value: 'edit',
+                                                    child: Row(children: [
+                                                      Icon(Icons.edit,
+                                                          size: 18),
+                                                      SizedBox(width: 8),
+                                                      Text('Editar')
+                                                    ])),
+                                                const PopupMenuItem(
+                                                    value: 'delete',
+                                                    child: Row(children: [
+                                                      Icon(Icons.delete,
+                                                          size: 18,
+                                                          color: Colors.red),
+                                                      SizedBox(width: 8),
+                                                      Text('Eliminar',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.red))
+                                                    ])),
+                                              ],
+                                              onSelected: (v) {
+                                                if (v == 'edit') {
+                                                  _abrirFormulario(p);
+                                                }
+                                                if (v == 'delete') {
+                                                  _delete(p);
+                                                }
+                                              },
+                                            ),
                                         ],
                                       ),
                                     ],

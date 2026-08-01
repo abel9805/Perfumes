@@ -327,7 +327,7 @@ class VendedorAppController extends Controller
 
         $rows = Perfume::query()
             ->orderBy('nombre')
-            ->get(['id', 'nombre', 'marca', 'descripcion', 'precio_venta', 'stock', 'imagen']);
+            ->get(['id', 'nombre', 'marca', 'mililitros', 'concentracion', 'descripcion', 'precio_venta', 'stock', 'imagen']);
 
         return response()->json($rows->map(function (Perfume $perfume) {
             $imagen = $perfume->imagen ?? null;
@@ -336,6 +336,8 @@ class VendedorAppController extends Controller
                 'perfume_id' => $perfume->id,
                 'nombre_perfume' => $perfume->nombre,
                 'marca_perfume' => $perfume->marca,
+                'mililitros' => $perfume->mililitros,
+                'concentracion' => $perfume->concentracion,
                 'descripcion_perfume' => $perfume->descripcion,
                 'precio_venta' => $perfume->precio_venta,
                 'stock' => $perfume->stock,
@@ -970,6 +972,7 @@ class VendedorAppController extends Controller
             'email' => $vendedor->email,
             'direccion' => $vendedor->direccion,
             'usuario' => $vendedor->usuario,
+            'tipo_usuario' => $vendedor->tipo_usuario ?: 'vendedor',
             'fecha_registro' => $regla['fecha_registro'],
             'meses_antiguedad' => $regla['meses_antiguedad'],
             'nivel_embajador' => $regla['nivel'],

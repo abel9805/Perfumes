@@ -21,6 +21,7 @@ class _VendedorFormState extends State<VendedorForm> {
   late TextEditingController _direccion;
   late TextEditingController _usuario;
   late TextEditingController _password;
+  String _tipoUsuario = 'vendedor';
   List<Perfume> _perfumes = [];
   final List<_StockInicialItem> _stockInicial = [];
   bool _loadingPerfumes = false;
@@ -36,6 +37,7 @@ class _VendedorFormState extends State<VendedorForm> {
     _direccion = TextEditingController(text: v?.direccion ?? '');
     _usuario = TextEditingController(text: v?.usuario ?? '');
     _password = TextEditingController(text: v?.password ?? '');
+    _tipoUsuario = v?.tipoUsuario == 'colega' ? 'colega' : 'vendedor';
     if (widget.vendedor == null) {
       _cargarPerfumes();
     }
@@ -125,6 +127,7 @@ class _VendedorFormState extends State<VendedorForm> {
       direccion: _direccion.text.trim(),
       usuario: _usuario.text.trim(),
       password: _password.text.trim(),
+      tipoUsuario: _tipoUsuario,
     );
     final db = DatabaseHelper();
     try {
@@ -181,6 +184,31 @@ class _VendedorFormState extends State<VendedorForm> {
                 const SizedBox(height: 14),
                 _field(_usuario, 'Usuario', Icons.account_circle,
                     required: true),
+                const SizedBox(height: 14),
+                DropdownButtonFormField<String>(
+                  initialValue: _tipoUsuario,
+                  decoration: InputDecoration(
+                    labelText: 'Tipo de usuario',
+                    prefixIcon: const Icon(Icons.badge),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'vendedor',
+                      child: Text('Vendedor'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'colega',
+                      child: Text('Colega'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => _tipoUsuario = value);
+                  },
+                ),
                 const SizedBox(height: 14),
                 _field(_password, 'Contraseña', Icons.lock, required: !isEdit),
                 if (!isEdit) ...[

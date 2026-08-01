@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+
 import 'config/app_mode.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  AppModeConfig.setMode(AppMode.admin);
-  runApp(const PerfumesApp());
+  AppModeConfig.setMode(AppMode.colega);
+  runApp(const ColegaApp());
 }
 
-class PerfumesApp extends StatelessWidget {
-  const PerfumesApp({super.key});
+class ColegaApp extends StatelessWidget {
+  const ColegaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Perfumes App',
+      title: 'Colega App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

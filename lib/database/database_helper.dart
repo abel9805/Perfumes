@@ -36,6 +36,8 @@ class DatabaseHelper {
       'api_id': id,
       'nombre': m['nombre'] ?? '',
       'marca': m['marca'] ?? '',
+      'mililitros': _toInt(m['mililitros']),
+      'concentracion': m['concentracion'],
       'descripcion': m['descripcion'] ?? '',
       'precio_costo': _toDouble(m['precio_costo']),
       'precio_venta': _toDouble(m['precio_venta']),
@@ -55,6 +57,7 @@ class DatabaseHelper {
       'direccion': m['direccion'] ?? '',
       'usuario': m['usuario'] ?? '',
       'password': m['password'] ?? '',
+      'tipo_usuario': m['tipo_usuario'] ?? 'vendedor',
       'fecha_registro': m['fecha_registro'] ?? m['created_at'],
       'nivel_embajador': m['nivel_embajador'] ?? '',
       'descuento_credito': _toDouble(m['descuento_credito']),
@@ -135,6 +138,8 @@ class DatabaseHelper {
     final remote = await _apiService.crearPerfume(
       nombre: perfume.nombre,
       marca: perfume.marca,
+      mililitros: perfume.mililitros,
+      concentracion: perfume.concentracion,
       descripcion: perfume.descripcion,
       precioCosto: perfume.precioCosto,
       precioVenta: perfume.precioVenta,
@@ -143,7 +148,8 @@ class DatabaseHelper {
     );
     final id = remote != null ? _toInt(remote['id']) : null;
     if (id == null) {
-      throw Exception('La API devolvio una respuesta invalida al crear el perfume');
+      throw Exception(
+          'La API devolvio una respuesta invalida al crear el perfume');
     }
     return id;
   }
@@ -169,6 +175,8 @@ class DatabaseHelper {
       id: id,
       nombre: perfume.nombre,
       marca: perfume.marca,
+      mililitros: perfume.mililitros,
+      concentracion: perfume.concentracion,
       descripcion: perfume.descripcion,
       precioCosto: perfume.precioCosto,
       precioVenta: perfume.precioVenta,
@@ -193,6 +201,8 @@ class DatabaseHelper {
       id: perfume.id!,
       nombre: perfume.nombre,
       marca: perfume.marca,
+      mililitros: perfume.mililitros,
+      concentracion: perfume.concentracion,
       descripcion: perfume.descripcion,
       precioCosto: perfume.precioCosto,
       precioVenta: perfume.precioVenta,
@@ -212,6 +222,7 @@ class DatabaseHelper {
       direccion: vendedor.direccion,
       usuario: vendedor.usuario,
       password: vendedor.password,
+      tipoUsuario: vendedor.tipoUsuario,
       initialEntregas: initialEntregas,
     );
     final id = remote != null ? _toInt(remote['id']) : null;
@@ -236,6 +247,7 @@ class DatabaseHelper {
       direccion: vendedor.direccion,
       usuario: vendedor.usuario,
       password: vendedor.password,
+      tipoUsuario: vendedor.tipoUsuario,
     );
 
     if (remote == null) throw Exception('No se pudo actualizar el vendedor');
@@ -410,8 +422,7 @@ class DatabaseHelper {
   }
 
   // VENTAS
-    Future<int> insertVenta(
-      VentaCredito venta, List<DetalleVenta> detalles,
+  Future<int> insertVenta(VentaCredito venta, List<DetalleVenta> detalles,
       {String? tipoVenta}) async {
     final items = detalles
         .map((d) => {

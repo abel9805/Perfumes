@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_mode.dart';
 import '../screens/home_screen.dart';
 import '../screens/perfumes/perfumes_screen.dart';
 import '../screens/vendedores/vendedores_screen.dart';
@@ -13,6 +14,7 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isColega = AppModeConfig.isColega;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -31,8 +33,8 @@ class AppDrawer extends StatelessWidget {
               children: [
                 const Icon(Icons.spa, size: 48, color: Colors.white),
                 const SizedBox(height: 8),
-                const Text(
-                  'Perfumes App',
+                Text(
+                  AppModeConfig.isColega ? 'COLEGA APP' : 'OVORA APP',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -40,30 +42,38 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Control de negocio',
+                  isColega ? 'Vista operativa' : 'Control de negocio',
                   style: TextStyle(color: Colors.purple.shade100, fontSize: 13),
                 ),
               ],
             ),
           ),
-          _buildTile(context, Icons.dashboard, 'Dashboard', const HomeScreen()),
-          const Divider(),
+          if (!isColega)
+            _buildTile(
+                context, Icons.dashboard, 'Dashboard', const HomeScreen()),
+          if (!isColega) const Divider(),
           _buildTile(
               context, Icons.local_florist, 'Perfumes', const PerfumesScreen()),
-          _buildTile(context, Icons.people_alt, 'Vendedores',
-              const VendedoresScreen()),
-          _buildTile(context, Icons.person, 'Clientes', const ClientesScreen()),
-          _buildTile(
-              context, Icons.percent, 'Comisiones', const ComisionesScreen()),
+          if (!isColega)
+            _buildTile(context, Icons.people_alt, 'Vendedores',
+                const VendedoresScreen()),
+          if (!isColega)
+            _buildTile(
+                context, Icons.person, 'Clientes', const ClientesScreen()),
+          if (!isColega)
+            _buildTile(
+                context, Icons.percent, 'Comisiones', const ComisionesScreen()),
           const Divider(),
           _buildTile(context, Icons.delivery_dining, 'Entregas a Vendedores',
               const EntregasScreen(tipoFiltro: 'todos')),
           _buildTile(context, Icons.local_shipping, 'Pedidos de Vendedores',
               const EntregasScreen(modoPedidos: true, tipoFiltro: 'pedido')),
-          _buildTile(context, Icons.attach_money, 'Saldo por cobrar',
-              const SaldoPorCobrarScreen()),
-          _buildTile(context, Icons.receipt_long, 'Ventas a Crédito',
-              const VentasScreen()),
+          if (!isColega)
+            _buildTile(context, Icons.attach_money, 'Saldo por cobrar',
+                const SaldoPorCobrarScreen()),
+          if (!isColega)
+            _buildTile(context, Icons.receipt_long, 'Ventas a Crédito',
+                const VentasScreen()),
         ],
       ),
     );

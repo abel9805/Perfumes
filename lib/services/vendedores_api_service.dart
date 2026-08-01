@@ -57,6 +57,8 @@ class VendedoresApiService {
   Future<Map<String, dynamic>?> crearPerfume({
     required String nombre,
     required String marca,
+    int? mililitros,
+    String? concentracion,
     required String descripcion,
     required double precioCosto,
     required double precioVenta,
@@ -67,6 +69,8 @@ class VendedoresApiService {
     final req = http.MultipartRequest('POST', uri)
       ..fields['nombre'] = nombre
       ..fields['marca'] = marca
+      ..fields['mililitros'] = mililitros?.toString() ?? ''
+      ..fields['concentracion'] = concentracion?.trim() ?? ''
       ..fields['descripcion'] = descripcion
       ..fields['precio_costo'] = precioCosto.toString()
       ..fields['precio_venta'] = precioVenta.toString()
@@ -82,13 +86,16 @@ class VendedoresApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return Map<String, dynamic>.from(jsonDecode(res.body) as Map);
     }
-    throw Exception(_extractApiError(res, 'No se pudo crear el perfume en la API'));
+    throw Exception(
+        _extractApiError(res, 'No se pudo crear el perfume en la API'));
   }
 
   Future<Map<String, dynamic>?> actualizarPerfume({
     required int id,
     required String nombre,
     required String marca,
+    int? mililitros,
+    String? concentracion,
     required String descripcion,
     required double precioCosto,
     required double precioVenta,
@@ -100,6 +107,8 @@ class VendedoresApiService {
       ..fields['_method'] = 'PUT'
       ..fields['nombre'] = nombre
       ..fields['marca'] = marca
+      ..fields['mililitros'] = mililitros?.toString() ?? ''
+      ..fields['concentracion'] = concentracion?.trim() ?? ''
       ..fields['descripcion'] = descripcion
       ..fields['precio_costo'] = precioCosto.toString()
       ..fields['precio_venta'] = precioVenta.toString()
@@ -115,7 +124,8 @@ class VendedoresApiService {
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return Map<String, dynamic>.from(jsonDecode(res.body) as Map);
     }
-    throw Exception(_extractApiError(res, 'No se pudo actualizar el perfume en la API'));
+    throw Exception(
+        _extractApiError(res, 'No se pudo actualizar el perfume en la API'));
   }
 
   Future<void> eliminarPerfume(int id) async {
@@ -152,6 +162,7 @@ class VendedoresApiService {
     required String direccion,
     required String usuario,
     required String password,
+    required String tipoUsuario,
     List<Map<String, dynamic>>? initialEntregas,
   }) async {
     final uri = Uri.parse('$_baseUrl/admin/vendedores');
@@ -165,6 +176,7 @@ class VendedoresApiService {
         'direccion': direccion,
         'usuario': usuario,
         'password': password,
+        'tipo_usuario': tipoUsuario,
         if (initialEntregas != null && initialEntregas.isNotEmpty)
           'initial_entregas': initialEntregas,
       }),
@@ -183,6 +195,7 @@ class VendedoresApiService {
     required String email,
     required String direccion,
     required String usuario,
+    required String tipoUsuario,
     String? password,
   }) async {
     final uri = Uri.parse('$_baseUrl/admin/vendedores/$apiId');
@@ -192,6 +205,7 @@ class VendedoresApiService {
       'email': email,
       'direccion': direccion,
       'usuario': usuario,
+      'tipo_usuario': tipoUsuario,
       if (password != null && password.isNotEmpty) 'password': password,
     };
     final res = await http.put(

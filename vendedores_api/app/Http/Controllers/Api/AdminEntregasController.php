@@ -600,7 +600,7 @@ class AdminEntregasController extends Controller
     {
         $rows = Perfume::query()
             ->orderBy('nombre')
-            ->get(['id', 'nombre', 'marca', 'descripcion', 'precio_costo', 'precio_venta', 'stock', 'imagen']);
+            ->get(['id', 'nombre', 'marca', 'mililitros', 'concentracion', 'descripcion', 'precio_costo', 'precio_venta', 'stock', 'imagen']);
 
         return response()->json($rows->map(fn(Perfume $p) => $this->perfumePayload($p))->values());
     }
@@ -610,6 +610,8 @@ class AdminEntregasController extends Controller
         $data = $request->validate([
             'nombre' => ['required', 'string'],
             'marca' => ['required', 'string'],
+            'mililitros' => ['nullable', 'integer', 'min:1'],
+            'concentracion' => ['nullable', 'string', 'max:60'],
             'descripcion' => ['nullable', 'string'],
             'precio_costo' => ['required', 'numeric', 'min:0'],
             'precio_venta' => ['required', 'numeric', 'min:0'],
@@ -620,6 +622,8 @@ class AdminEntregasController extends Controller
         $perfumeData = [
             'nombre' => $data['nombre'],
             'marca' => $data['marca'],
+            'mililitros' => $data['mililitros'] ?? null,
+            'concentracion' => $data['concentracion'] ?? null,
             'descripcion' => $data['descripcion'] ?? null,
             'precio_costo' => $data['precio_costo'],
             'precio_venta' => $data['precio_venta'],
@@ -645,6 +649,8 @@ class AdminEntregasController extends Controller
         $data = $request->validate([
             'nombre' => ['required', 'string'],
             'marca' => ['required', 'string'],
+            'mililitros' => ['nullable', 'integer', 'min:1'],
+            'concentracion' => ['nullable', 'string', 'max:60'],
             'descripcion' => ['nullable', 'string'],
             'precio_costo' => ['required', 'numeric', 'min:0'],
             'precio_venta' => ['required', 'numeric', 'min:0'],
@@ -695,6 +701,8 @@ class AdminEntregasController extends Controller
             'id' => $perfume->id,
             'nombre' => $perfume->nombre,
             'marca' => $perfume->marca,
+            'mililitros' => $perfume->mililitros,
+            'concentracion' => $perfume->concentracion,
             'descripcion' => $perfume->descripcion,
             'precio_costo' => $perfume->precio_costo,
             'precio_venta' => $perfume->precio_venta,
@@ -724,6 +732,7 @@ class AdminEntregasController extends Controller
             'direccion' => ['nullable', 'string'],
             'usuario' => ['required', 'string', 'unique:vendedores,usuario'],
             'password' => ['required', 'string'],
+            'tipo_usuario' => ['nullable', 'string', 'in:colega,vendedor'],
             'initial_entregas' => ['nullable', 'array'],
             'initial_entregas.*.perfume_id' => ['required', 'integer', 'exists:perfumes,id'],
             'initial_entregas.*.cantidad' => ['required', 'integer', 'min:1'],
@@ -739,6 +748,7 @@ class AdminEntregasController extends Controller
                 'direccion' => $data['direccion'] ?? null,
                 'usuario' => $data['usuario'],
                 'password' => $data['password'],
+                'tipo_usuario' => $data['tipo_usuario'] ?? 'vendedor',
             ]);
 
             foreach (($data['initial_entregas'] ?? []) as $entrega) {
@@ -773,10 +783,15 @@ class AdminEntregasController extends Controller
             'direccion' => ['nullable', 'string'],
             'usuario' => ['required', 'string', 'unique:vendedores,usuario,' . $id],
             'password' => ['nullable', 'string'],
+            'tipo_usuario' => ['nullable', 'string', 'in:colega,vendedor'],
         ]);
 
         if (empty($data['password'])) {
             unset($data['password']);
+        }
+
+        if (empty($data['tipo_usuario'])) {
+            unset($data['tipo_usuario']);
         }
 
         $vendedor->update($data);
@@ -1166,6 +1181,7 @@ class AdminEntregasController extends Controller
             'email' => $vendedor->email,
             'direccion' => $vendedor->direccion,
             'usuario' => $vendedor->usuario,
+            'tipo_usuario' => $vendedor->tipo_usuario ?: 'vendedor',
             'fecha_registro' => $regla['fecha_registro'],
             'meses_antiguedad' => $regla['meses_antiguedad'],
             'nivel_embajador' => $regla['nivel'],

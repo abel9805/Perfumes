@@ -18,5 +18,6 @@ class Vendedor extends Model
         'direccion',
         'usuario',
         'password',
+        'tipo_usuario',
     ];
 }

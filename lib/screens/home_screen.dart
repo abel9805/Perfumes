@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../config/admin_scope.dart';
+import '../config/app_mode.dart';
 import '../database/database_helper.dart';
 import '../models/cliente.dart';
 import '../models/venta_credito.dart';
@@ -103,11 +104,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isColega = AppModeConfig.isColega;
     return AdminBackHandler(
       isDashboard: true,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Dashboard'),
+          title: Text(isColega ? 'Colega' : 'Dashboard'),
           backgroundColor: Colors.purple.shade700,
           foregroundColor: Colors.white,
           actions: [
@@ -159,188 +161,226 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       if (_error != null) const SizedBox(height: 12),
                       Text(
-                        'Resumen general',
+                        isColega ? 'Módulos disponibles' : 'Resumen general',
                         style: Theme.of(context)
                             .textTheme
                             .headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-
-                      // 1) Ventas por vendedor
-                      Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      if (isColega) ...[
+                        _buildWideCard(
+                          context,
+                          icon: Icons.local_florist,
+                          label: 'Perfumes',
+                          value: '${_resumen['totalPerfumes'] ?? 0}',
+                          color: Colors.purple.shade700,
+                          onTap: () =>
+                              _navigateTo(context, const PerfumesScreen()),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.bar_chart,
-                                      color: Colors.purple.shade700),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Ventas por vendedor',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              if (_ventasPorVendedor.isEmpty)
-                                const Text(
-                                  'Aún no hay ventas registradas.',
-                                  style: TextStyle(color: Colors.black54),
-                                )
-                              else
-                                ..._ventasPorVendedor.map((row) {
-                                  final nombre =
-                                      row['nombre_vendedor']?.toString() ??
-                                          'Sin vendedor';
-                                  final totalVentas =
-                                      _toInt(row['total_ventas']);
-                                  final saldoPendiente =
-                                      _toDouble(row['saldo_pendiente']);
-                                  return ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.purple.shade100,
-                                      child: Text(totalVentas.toString()),
+                        const SizedBox(height: 12),
+                        _buildWideCard(
+                          context,
+                          icon: Icons.delivery_dining,
+                          label: 'Entregas a Vendedores',
+                          value: '${_resumen['entregasPendientes'] ?? 0}',
+                          color: Colors.green.shade700,
+                          onTap: () => _navigateTo(
+                            context,
+                            const EntregasScreen(tipoFiltro: 'todos'),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildWideCard(
+                          context,
+                          icon: Icons.local_shipping,
+                          label: 'Pedidos de Vendedores',
+                          value: '${_resumen['pedidosPorSurtir'] ?? 0}',
+                          color: Colors.blue.shade700,
+                          onTap: () => _navigateTo(
+                            context,
+                            const EntregasScreen(
+                                modoPedidos: true, tipoFiltro: 'pedido'),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ] else ...[
+                        // 1) Ventas por vendedor
+                        Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.bar_chart,
+                                        color: Colors.purple.shade700),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Ventas por vendedor',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold),
                                     ),
-                                    title: Text(nombre),
-                                    subtitle: Text('$totalVentas ventas'),
-                                    trailing: Text(
-                                      '\$${saldoPendiente.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: saldoPendiente > 0
-                                            ? Colors.red.shade700
-                                            : Colors.green.shade700,
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                if (_ventasPorVendedor.isEmpty)
+                                  const Text(
+                                    'Aún no hay ventas registradas.',
+                                    style: TextStyle(color: Colors.black54),
+                                  )
+                                else
+                                  ..._ventasPorVendedor.map((row) {
+                                    final nombre =
+                                        row['nombre_vendedor']?.toString() ??
+                                            'Sin vendedor';
+                                    final totalVentas =
+                                        _toInt(row['total_ventas']);
+                                    final saldoPendiente =
+                                        _toDouble(row['saldo_pendiente']);
+                                    return ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      leading: CircleAvatar(
+                                        backgroundColor: Colors.purple.shade100,
+                                        child: Text(totalVentas.toString()),
                                       ),
-                                    ),
-                                  );
-                                }),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 2) Saldo pendiente por cobrar
-                      _buildWideCard(
-                        context,
-                        icon: Icons.attach_money,
-                        label: 'Saldo pendiente por cobrar',
-                        value:
-                            '\$${_toDouble(_resumen['saldoPendiente']).toStringAsFixed(2)}',
-                        color: Colors.red.shade700,
-                        onTap: () =>
-                            _navigateTo(context, const SaldoPorCobrarScreen()),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 3) Entregas por liquidar
-                      _buildWideCard(
-                        context,
-                        icon: Icons.delivery_dining,
-                        label: 'Entregas pendientes de liquidar',
-                        value: '${_resumen['entregasPendientes']}',
-                        color: Colors.green.shade700,
-                        onTap: () => _navigateTo(
-                          context,
-                          const EntregasScreen(tipoFiltro: 'todos'),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 4) Pedidos por surtir
-                      _buildWideCard(
-                        context,
-                        icon: Icons.local_shipping,
-                        label: 'Pedidos por surtir',
-                        value: '${_resumen['pedidosPorSurtir']}',
-                        color: Colors.blue.shade700,
-                        onTap: () => _navigateTo(
-                          context,
-                          const EntregasScreen(modoPedidos: true),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 5) Cuadros finales
-                      GridView.count(
-                        crossAxisCount: 2,
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 1.3,
-                        children: [
-                          _buildCard(
-                            context,
-                            icon: Icons.local_florist,
-                            label: 'Perfumes',
-                            value: '${_resumen['totalPerfumes']}',
-                            color: Colors.purple,
-                            onTap: () =>
-                                _navigateTo(context, const PerfumesScreen()),
-                          ),
-                          _buildCard(
-                            context,
-                            icon: Icons.people_alt,
-                            label: 'Vendedores',
-                            value: '${_resumen['totalVendedores']}',
-                            color: Colors.indigo,
-                            onTap: () =>
-                                _navigateTo(context, const VendedoresScreen()),
-                          ),
-                          _buildCard(
-                            context,
-                            icon: Icons.person,
-                            label: 'Clientes',
-                            value: '${_resumen['totalClientes']}',
-                            color: Colors.teal,
-                            onTap: () =>
-                                _navigateTo(context, const ClientesScreen()),
-                          ),
-                          _buildCard(
-                            context,
-                            icon: Icons.receipt_long,
-                            label: 'Ventas pendientes',
-                            value: '${_resumen['ventasPendientes']}',
-                            color: Colors.orange,
-                            onTap: () =>
-                                _navigateTo(context, const VentasScreen()),
-                          ),
-                          _buildCard(
-                            context,
-                            icon: Icons.delivery_dining,
-                            label: 'Entregas pendientes',
-                            value: '${_resumen['entregasPendientes']}',
-                            color: Colors.green,
-                            onTap: () =>
-                                _navigateTo(context, const EntregasScreen()),
-                          ),
-                          _buildCard(
-                            context,
-                            icon: Icons.local_shipping,
-                            label: 'Pedidos por surtir',
-                            value: '${_resumen['pedidosPorSurtir']}',
-                            color: Colors.blue,
-                            onTap: () => _navigateTo(
-                              context,
-                              const EntregasScreen(modoPedidos: true),
+                                      title: Text(nombre),
+                                      subtitle: Text('$totalVentas ventas'),
+                                      trailing: Text(
+                                        '\$${saldoPendiente.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: saldoPendiente > 0
+                                              ? Colors.red.shade700
+                                              : Colors.green.shade700,
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 2) Saldo pendiente por cobrar
+                        _buildWideCard(
+                          context,
+                          icon: Icons.attach_money,
+                          label: 'Saldo pendiente por cobrar',
+                          value:
+                              '\$${_toDouble(_resumen['saldoPendiente']).toStringAsFixed(2)}',
+                          color: Colors.red.shade700,
+                          onTap: () => _navigateTo(
+                              context, const SaldoPorCobrarScreen()),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 3) Entregas por liquidar
+                        _buildWideCard(
+                          context,
+                          icon: Icons.delivery_dining,
+                          label: 'Entregas pendientes de liquidar',
+                          value: '${_resumen['entregasPendientes']}',
+                          color: Colors.green.shade700,
+                          onTap: () => _navigateTo(
+                            context,
+                            const EntregasScreen(tipoFiltro: 'todos'),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 4) Pedidos por surtir
+                        _buildWideCard(
+                          context,
+                          icon: Icons.local_shipping,
+                          label: 'Pedidos por surtir',
+                          value: '${_resumen['pedidosPorSurtir']}',
+                          color: Colors.blue.shade700,
+                          onTap: () => _navigateTo(
+                            context,
+                            const EntregasScreen(modoPedidos: true),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // 5) Cuadros finales
+                        GridView.count(
+                          crossAxisCount: 2,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.3,
+                          children: [
+                            _buildCard(
+                              context,
+                              icon: Icons.local_florist,
+                              label: 'Perfumes',
+                              value: '${_resumen['totalPerfumes']}',
+                              color: Colors.purple,
+                              onTap: () =>
+                                  _navigateTo(context, const PerfumesScreen()),
+                            ),
+                            _buildCard(
+                              context,
+                              icon: Icons.people_alt,
+                              label: 'Vendedores',
+                              value: '${_resumen['totalVendedores']}',
+                              color: Colors.indigo,
+                              onTap: () => _navigateTo(
+                                  context, const VendedoresScreen()),
+                            ),
+                            _buildCard(
+                              context,
+                              icon: Icons.person,
+                              label: 'Clientes',
+                              value: '${_resumen['totalClientes']}',
+                              color: Colors.teal,
+                              onTap: () =>
+                                  _navigateTo(context, const ClientesScreen()),
+                            ),
+                            _buildCard(
+                              context,
+                              icon: Icons.receipt_long,
+                              label: 'Ventas pendientes',
+                              value: '${_resumen['ventasPendientes']}',
+                              color: Colors.orange,
+                              onTap: () =>
+                                  _navigateTo(context, const VentasScreen()),
+                            ),
+                            _buildCard(
+                              context,
+                              icon: Icons.delivery_dining,
+                              label: 'Entregas pendientes',
+                              value: '${_resumen['entregasPendientes']}',
+                              color: Colors.green,
+                              onTap: () =>
+                                  _navigateTo(context, const EntregasScreen()),
+                            ),
+                            _buildCard(
+                              context,
+                              icon: Icons.local_shipping,
+                              label: 'Pedidos por surtir',
+                              value: '${_resumen['pedidosPorSurtir']}',
+                              color: Colors.blue,
+                              onTap: () => _navigateTo(
+                                context,
+                                const EntregasScreen(modoPedidos: true),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ],
                   ),
                 ),

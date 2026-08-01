@@ -24,6 +24,9 @@ flutter pub get
 # Ejecutar en Android/iOS
 flutter run
 
+# Ejecutar app colega (solo perfumes, entregas y pedidos)
+flutter run -t lib/main_colega.dart
+
 # Compilar APK
 flutter build apk --release
 ```

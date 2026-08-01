@@ -133,9 +133,14 @@ class _VendedoresScreenState extends State<VendedoresScreen> {
                               if (v.telefono.isNotEmpty)
                                 Text('Tel: ${v.telefono}'),
                               if (v.email.isNotEmpty) Text(v.email),
+                              Text(
+                                'Tipo usuario: ${v.tipoUsuario == 'colega' ? 'Colega' : 'Vendedor'}',
+                              ),
                               const SizedBox(height: 4),
-                              Text('Fecha alta: ${_formatDate(v.fechaRegistro)}'),
-                              Text('Nivel: ${v.nivelEmbajador.isEmpty ? '-' : v.nivelEmbajador}'),
+                              Text(
+                                  'Fecha alta: ${_formatDate(v.fechaRegistro)}'),
+                              Text(
+                                  'Nivel: ${v.nivelEmbajador.isEmpty ? '-' : v.nivelEmbajador}'),
                               Text(
                                 'Descuento disponible: Crédito ${v.descuentoCredito.toStringAsFixed(0)}% · Contado ${v.descuentoContado.toStringAsFixed(0)}%',
                               ),
@@ -196,8 +201,7 @@ class _VendedoresScreenState extends State<VendedoresScreen> {
                               }
                             },
                           ),
-                          isThreeLine:
-                              true,
+                          isThreeLine: true,
                         ),
                       );
                     },

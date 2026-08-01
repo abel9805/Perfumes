@@ -7,6 +7,7 @@ class Vendedor {
   String direccion;
   String usuario;
   String password;
+  String tipoUsuario;
   String? fechaRegistro;
   String nivelEmbajador;
   double descuentoCredito;
@@ -23,6 +24,7 @@ class Vendedor {
     this.direccion = '',
     this.usuario = '',
     this.password = '',
+    this.tipoUsuario = 'vendedor',
     this.fechaRegistro,
     this.nivelEmbajador = '',
     this.descuentoCredito = 0,
@@ -41,6 +43,7 @@ class Vendedor {
       'direccion': direccion,
       'usuario': usuario,
       'password': password,
+      'tipo_usuario': tipoUsuario,
       'fecha_registro': fechaRegistro,
       'nivel_embajador': nivelEmbajador,
       'descuento_credito': descuentoCredito,
@@ -67,8 +70,11 @@ class Vendedor {
       direccion: map['direccion'] ?? '',
       usuario: map['usuario'] ?? '',
       password: map['password'] ?? '',
-      fechaRegistro: map['fecha_registro']?.toString() ??
-          map['created_at']?.toString(),
+      tipoUsuario: map['tipo_usuario']?.toString().trim().isNotEmpty == true
+          ? map['tipo_usuario'].toString()
+          : 'vendedor',
+      fechaRegistro:
+          map['fecha_registro']?.toString() ?? map['created_at']?.toString(),
       nivelEmbajador: map['nivel_embajador']?.toString() ?? '',
       descuentoCredito: _asDouble(map['descuento_credito']),
       descuentoContado: _asDouble(map['descuento_contado']),
