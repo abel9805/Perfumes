@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../config/app_mode.dart';
 import '../../database/database_helper.dart';
 import '../../models/entrega_vendedor.dart';
 import '../../models/vendedor.dart';
@@ -67,9 +68,11 @@ class _EntregaFormState extends State<EntregaForm> {
     }
     final cant = int.parse(_cantidad.text);
     if (cant > _perfumeSel!.stock) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text('Stock insuficiente. Disponible: ${_perfumeSel!.stock}')));
+      final msg = AppModeConfig.isColega
+        ? 'Cantidad no disponible.'
+        : 'Stock insuficiente. Disponible: ${_perfumeSel!.stock}';
+      ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
       return;
     }
     setState(() => _guardando = true);
@@ -96,6 +99,7 @@ class _EntregaFormState extends State<EntregaForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isColega = AppModeConfig.isColega;
     return AdminBackHandler(
       dashboardBuilder: (_) => const HomeScreen(),
       child: Scaffold(
@@ -152,8 +156,9 @@ class _EntregaFormState extends State<EntregaForm> {
                             items: _perfumes
                                 .map((p) => DropdownMenuItem(
                                       value: p,
-                                      child: Text(
-                                          '${p.nombre} (Stock: ${p.stock})'),
+                                  child: Text(isColega
+                                    ? p.nombre
+                                    : '${p.nombre} (Stock: ${p.stock})'),
                                     ))
                                 .toList(),
                             onChanged: (p) {

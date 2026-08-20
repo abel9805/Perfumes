@@ -18,6 +18,8 @@ class _PerfumeFormState extends State<PerfumeForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nombre;
   late TextEditingController _marca;
+  late TextEditingController _mililitros;
+  late TextEditingController _concentracion;
   late TextEditingController _descripcion;
   late TextEditingController _precioCosto;
   late TextEditingController _precioVenta;
@@ -33,6 +35,9 @@ class _PerfumeFormState extends State<PerfumeForm> {
     final p = widget.perfume;
     _nombre = TextEditingController(text: p?.nombre ?? '');
     _marca = TextEditingController(text: p?.marca ?? '');
+    _mililitros =
+      TextEditingController(text: p?.mililitros != null ? p!.mililitros.toString() : '');
+    _concentracion = TextEditingController(text: p?.concentracion ?? '');
     _descripcion = TextEditingController(text: p?.descripcion ?? '');
     _precioCosto =
         TextEditingController(text: p != null ? p.precioCosto.toString() : '');
@@ -45,6 +50,8 @@ class _PerfumeFormState extends State<PerfumeForm> {
   void dispose() {
     _nombre.dispose();
     _marca.dispose();
+    _mililitros.dispose();
+    _concentracion.dispose();
     _descripcion.dispose();
     _precioCosto.dispose();
     _precioVenta.dispose();
@@ -61,6 +68,12 @@ class _PerfumeFormState extends State<PerfumeForm> {
         apiId: widget.perfume?.apiId,
         nombre: _nombre.text.trim(),
         marca: _marca.text.trim(),
+        mililitros: _mililitros.text.trim().isEmpty
+          ? null
+          : int.tryParse(_mililitros.text.trim()),
+        concentracion: _concentracion.text.trim().isEmpty
+          ? null
+          : _concentracion.text.trim(),
         descripcion: _descripcion.text.trim(),
         precioCosto: double.parse(_precioCosto.text),
         precioVenta: double.parse(_precioVenta.text),
@@ -128,6 +141,21 @@ class _PerfumeFormState extends State<PerfumeForm> {
                 const SizedBox(height: 14),
                 _field(_marca, 'Marca', Icons.branding_watermark,
                     required: true),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(
+                          _mililitros, 'Mililitros (ml)', Icons.straighten,
+                          numeric: true, isInt: true),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _field(_concentracion, 'Concentración',
+                          Icons.opacity),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 14),
                 _field(_descripcion, 'Descripción (opcional)', Icons.notes,
                     maxLines: 3),

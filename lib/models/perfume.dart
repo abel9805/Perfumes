@@ -3,6 +3,8 @@ class Perfume {
   int? apiId;
   String nombre;
   String marca;
+  int? mililitros;
+  String? concentracion;
   String descripcion;
   double precioCosto;
   double precioVenta;
@@ -14,6 +16,8 @@ class Perfume {
     this.apiId,
     required this.nombre,
     required this.marca,
+    this.mililitros,
+    this.concentracion,
     this.descripcion = '',
     required this.precioCosto,
     required this.precioVenta,
@@ -27,6 +31,8 @@ class Perfume {
       'api_id': apiId,
       'nombre': nombre,
       'marca': marca,
+      'mililitros': mililitros,
+      'concentracion': concentracion,
       'descripcion': descripcion,
       'precio_costo': precioCosto,
       'precio_venta': precioVenta,
@@ -53,6 +59,10 @@ class Perfume {
       apiId: _asInt(map['api_id']) == 0 ? null : _asInt(map['api_id']),
       nombre: map['nombre']?.toString() ?? '',
       marca: map['marca']?.toString() ?? '',
+        mililitros: _asInt(map['mililitros']) == 0 ? null : _asInt(map['mililitros']),
+        concentracion: map['concentracion']?.toString().isNotEmpty == true
+          ? map['concentracion'].toString()
+          : null,
       descripcion: map['descripcion'] ?? '',
       precioCosto: _asDouble(map['precio_costo']),
       precioVenta: _asDouble(map['precio_venta']),

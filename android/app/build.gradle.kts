@@ -23,6 +23,20 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appLabel"] = "OVORA"
+    }
+
+    flavorDimensions += "app"
+    productFlavors {
+        create("admin") {
+            dimension = "app"
+            manifestPlaceholders["appLabel"] = "OVORA Admin"
+        }
+        create("colega") {
+            dimension = "app"
+            applicationIdSuffix = ".colega"
+            manifestPlaceholders["appLabel"] = "OVORA Colega"
+        }
     }
 
     buildTypes {

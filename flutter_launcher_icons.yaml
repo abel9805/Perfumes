@@ -1,0 +1,7 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "/home/daniel-pinto/Descargas/OVORA.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "/home/daniel-pinto/Descargas/OVORA.png"
+  remove_alpha_ios: true

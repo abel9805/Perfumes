@@ -238,30 +238,33 @@ class _PerfumesScreenState extends State<PerfumesScreen> {
                                       const Spacer(),
                                       Row(
                                         children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: p.stock > 5
-                                                  ? Colors.green.shade100
-                                                  : p.stock > 0
-                                                      ? Colors.orange.shade100
-                                                      : Colors.red.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Text(
-                                              'Stock: ${p.stock}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
+                                          if (!isColega)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 4),
+                                              decoration: BoxDecoration(
                                                 color: p.stock > 5
-                                                    ? Colors.green.shade800
+                                                    ? Colors.green.shade100
                                                     : p.stock > 0
-                                                        ? Colors.orange.shade800
-                                                        : Colors.red.shade800,
+                                                        ? Colors.orange.shade100
+                                                        : Colors.red.shade100,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                'Stock: ${p.stock}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: p.stock > 5
+                                                      ? Colors.green.shade800
+                                                      : p.stock > 0
+                                                          ? Colors.orange.shade800
+                                                          : Colors.red.shade800,
+                                                ),
                                               ),
                                             ),
-                                          ),
                                           const Spacer(),
                                           if (!isColega)
                                             PopupMenuButton(

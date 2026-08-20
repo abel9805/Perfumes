@@ -13,7 +13,7 @@ class VendedoresApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vendedores App',
+      title: 'OVORA EMBAJADOR',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -40,7 +40,7 @@ class VendedoresApp extends StatelessWidget {
 class ApiConfig {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:8000/api',
+    defaultValue: 'https://api.ovora.lat/api',
   );
 }
 
