@@ -26,6 +26,7 @@ class _EntregaFormState extends State<EntregaForm> {
   Perfume? _perfumeSel;
   final _cantidad = TextEditingController(text: '1');
   final _precio = TextEditingController();
+  final _busquedaPerfume = TextEditingController();
   DateTime _fecha = DateTime.now();
   bool _guardando = false;
   bool _loading = true;
@@ -34,6 +35,14 @@ class _EntregaFormState extends State<EntregaForm> {
   void initState() {
     super.initState();
     _cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _cantidad.dispose();
+    _precio.dispose();
+    _busquedaPerfume.dispose();
+    super.dispose();
   }
 
   Future<void> _cargarDatos() async {
@@ -54,9 +63,30 @@ class _EntregaFormState extends State<EntregaForm> {
         if (_perfumeSel != null) {
           _precio.text = _perfumeSel!.precioVenta.toString();
         }
+        _busquedaPerfume.clear();
         _loading = false;
       });
     }
+  }
+
+  List<Perfume> get _perfumesBuscados {
+    final query = _busquedaPerfume.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      return _perfumes;
+    }
+    return _perfumes.where((p) {
+      final nombre = p.nombre.toLowerCase();
+      final marca = p.marca.toLowerCase();
+      return nombre.contains(query) || marca.contains(query);
+    }).toList();
+  }
+
+  void _seleccionarPerfume(Perfume perfume) {
+    setState(() {
+      _perfumeSel = perfume;
+      _busquedaPerfume.clear();
+      _precio.text = perfume.precioVenta.toString();
+    });
   }
 
   Future<void> _guardar() async {
@@ -151,32 +181,87 @@ class _EntregaFormState extends State<EntregaForm> {
                           const Text('Perfume',
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 6),
-                          DropdownButtonFormField<Perfume>(
-                            initialValue: _perfumeSel,
-                            items: _perfumes
-                                .map((p) => DropdownMenuItem(
-                                      value: p,
-                                  child: Text(isColega
-                                    ? p.nombre
-                                    : '${p.nombre} (Stock: ${p.stock})'),
-                                    ))
-                                .toList(),
-                            onChanged: (p) {
-                              setState(() {
-                                _perfumeSel = p;
-                                if (p != null) {
-                                  _precio.text = p.precioVenta.toString();
-                                }
-                              });
-                            },
+                          TextFormField(
+                            controller: _busquedaPerfume,
+                            autofocus: false,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.local_florist),
+                              hintText: 'Buscar perfume por nombre o marca',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _perfumeSel != null
+                                  ? const Icon(Icons.check_circle,
+                                      color: Colors.green)
+                                  : null,
                               border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                            validator: (v) =>
-                                v == null ? 'Selecciona un perfume' : null,
+                            onChanged: (_) => setState(() {}),
+                            validator: (_) =>
+                                _perfumeSel == null ? 'Selecciona un perfume' : null,
                           ),
+                          const SizedBox(height: 8),
+                          if (_busquedaPerfume.text.trim().isNotEmpty ||
+                              _perfumeSel == null)
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 220),
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black26),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: _perfumesBuscados.length,
+                                  separatorBuilder: (_, __) =>
+                                      const Divider(height: 1),
+                                  itemBuilder: (context, index) {
+                                    final perfume = _perfumesBuscados[index];
+                                    return ListTile(
+                                      dense: true,
+                                      title: Text(
+                                        AppModeConfig.isColega
+                                            ? perfume.nombre
+                                            : '${perfume.nombre} · Stock: ${perfume.stock}',
+                                      ),
+                                      subtitle: Text(
+                                        '${perfume.marca} · S/. ${perfume.precioVenta.toStringAsFixed(2)}',
+                                      ),
+                                      onTap: () => _seleccionarPerfume(perfume),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          if (_perfumeSel != null &&
+                              _busquedaPerfume.text.trim().isEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.check_circle,
+                                      color: Colors.green),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      isColega
+                                          ? _perfumeSel!.nombre
+                                          : '${_perfumeSel!.nombre} · Stock: ${_perfumeSel!.stock} · S/. ${_perfumeSel!.precioVenta.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -273,10 +358,4 @@ class _EntregaFormState extends State<EntregaForm> {
     );
   }
 
-  @override
-  void dispose() {
-    _cantidad.dispose();
-    _precio.dispose();
-    super.dispose();
-  }
 }
