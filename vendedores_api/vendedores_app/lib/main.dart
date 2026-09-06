@@ -306,7 +306,10 @@ class ApiService {
 
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception(
-        _extractErrorMessage(res, 'No se pudo enviar el pago a confirmacion'),
+        _extractErrorMessage(
+          res,
+          'No se pudo enviar el pago a confirmacion',
+        ),
       );
     }
   }
@@ -1686,6 +1689,60 @@ class _PendientesScreenState extends State<PendientesScreen> {
     _load();
   }
 
+  void _mostrarImagenGrande(String title, String imageUrl) {
+    if (imageUrl.trim().isEmpty) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                onPressed: () => Navigator.pop(ctx),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 420),
+              child: InteractiveViewer(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    padding: const EdgeInsets.all(24),
+                    color: Colors.indigo.shade50,
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 72,
+                      color: Colors.indigo.shade700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
@@ -1702,29 +1759,50 @@ class _PendientesScreenState extends State<PendientesScreen> {
           final tipo = item['tipo']?.toString() ?? '';
           final esInicial = tipo == 'inicial';
           final esPedido = tipo == 'pedido';
+          final imagenUrl = item['imagen_url']?.toString() ?? '';
+          final nombre = item['nombre_perfume']?.toString() ?? 'Perfume';
+
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: esInicial
-                    ? Colors.purple.shade100
-                    : esPedido
-                    ? Colors.blue.shade100
-                    : Colors.green.shade100,
-                child: Icon(
-                  esInicial
-                      ? Icons.inventory_2
-                      : esPedido
-                      ? Icons.local_shipping
-                      : Icons.delivery_dining,
-                  color: esInicial
-                      ? Colors.purple.shade700
-                      : esPedido
-                      ? Colors.blue.shade700
-                      : Colors.green.shade700,
+              leading: GestureDetector(
+                onTap: () => _mostrarImagenGrande(nombre, imagenUrl),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: imagenUrl.isNotEmpty
+                        ? Image.network(
+                            imagenUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: Colors.indigo.shade50,
+                              child: Icon(
+                                esInicial
+                                    ? Icons.inventory_2
+                                    : esPedido
+                                    ? Icons.local_shipping
+                                    : Icons.delivery_dining,
+                                color: Colors.indigo.shade700,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            color: Colors.indigo.shade50,
+                            child: Icon(
+                              esInicial
+                                  ? Icons.inventory_2
+                                  : esPedido
+                                  ? Icons.local_shipping
+                                  : Icons.delivery_dining,
+                              color: Colors.indigo.shade700,
+                            ),
+                          ),
+                  ),
                 ),
               ),
-              title: Text(item['nombre_perfume']?.toString() ?? 'Perfume'),
+              title: Text(nombre),
               subtitle: Text(
                 '${esInicial
                     ? 'Entrega inicial por confirmar'
@@ -1767,6 +1845,7 @@ class _PedidosScreenState extends State<PedidosScreen> {
   List<Map<String, dynamic>> _catalogo = [];
   List<Map<String, dynamic>> _pedidos = [];
   String _filtroEstado = 'todos';
+  String _busqueda = '';
 
   int _toInt(dynamic value) {
     if (value is int) return value;
@@ -1822,6 +1901,18 @@ class _PedidosScreenState extends State<PedidosScreen> {
     return _pedidos
         .where((p) => p['estado']?.toString() != 'solicitado')
         .toList();
+  }
+
+  List<Map<String, dynamic>> get _catalogoFiltrado {
+    final query = _busqueda.trim().toLowerCase();
+    if (query.isEmpty) return _catalogo;
+
+    return _catalogo.where((perfume) {
+      final nombre = perfume['nombre_perfume']?.toString() ?? '';
+      final marca = perfume['marca_perfume']?.toString() ?? '';
+      final texto = '$nombre $marca'.toLowerCase();
+      return texto.contains(query);
+    }).toList();
   }
 
   Future<void> _elegirCantidad(Map<String, dynamic> perfume) async {
@@ -1908,6 +1999,60 @@ class _PedidosScreenState extends State<PedidosScreen> {
     }
   }
 
+  void _mostrarImagenGrande(String title, String imageUrl) {
+    if (imageUrl.trim().isEmpty) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                onPressed: () => Navigator.pop(ctx),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 420),
+              child: InteractiveViewer(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    padding: const EdgeInsets.all(24),
+                    color: Colors.indigo.shade50,
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 72,
+                      color: Colors.indigo.shade700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPedidoCard(Map<String, dynamic> pedido) {
     final estado = pedido['estado']?.toString() ?? 'solicitado';
     final label = estado == 'solicitado'
@@ -1917,6 +2062,8 @@ class _PedidosScreenState extends State<PedidosScreen> {
         : estado == 'confirmado'
         ? 'Aceptado'
         : estado;
+    final imagenUrl = pedido['imagen_url']?.toString() ?? '';
+    final nombre = pedido['nombre_perfume']?.toString() ?? 'Perfume';
 
     final color = estado == 'solicitado'
         ? Colors.orange.shade700
@@ -1927,11 +2074,28 @@ class _PedidosScreenState extends State<PedidosScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.15),
-          child: Icon(Icons.local_shipping, color: color),
+        leading: GestureDetector(
+          onTap: () => _mostrarImagenGrande(nombre, imagenUrl),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              width: 48,
+              height: 48,
+              color: Colors.indigo.shade50,
+              child: imagenUrl.isNotEmpty
+                  ? Image.network(
+                      imagenUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.local_shipping,
+                        color: color,
+                      ),
+                    )
+                  : Icon(Icons.local_shipping, color: color),
+            ),
+          ),
         ),
-        title: Text(pedido['nombre_perfume']?.toString() ?? 'Perfume'),
+        title: Text(nombre),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1952,15 +2116,42 @@ class _PedidosScreenState extends State<PedidosScreen> {
     final stock = _toInt(perfume['stock']);
     final seleccion = _seleccionados[perfumeId];
     final cantidad = _toInt(seleccion?['cantidad']);
+    final imagenUrl = perfume['imagen_url']?.toString() ?? '';
+    final nombre = perfume['nombre_perfume']?.toString() ?? 'Perfume';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.purple.shade100,
-          child: Icon(Icons.spa, color: Colors.purple.shade700),
+        leading: GestureDetector(
+          onTap: () => _mostrarImagenGrande(nombre, imagenUrl),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: imagenUrl.isNotEmpty
+                  ? Image.network(
+                      imagenUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.purple.shade100,
+                        child: Icon(
+                          Icons.spa,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.purple.shade100,
+                      child: Icon(
+                        Icons.spa,
+                        color: Colors.purple.shade700,
+                      ),
+                    ),
+            ),
+          ),
         ),
-        title: Text(perfume['nombre_perfume']?.toString() ?? 'Perfume'),
+        title: Text(nombre),
         subtitle: Text(
           'Marca: ${perfume['marca_perfume']?.toString() ?? '-'} · Stock: $stock · \$${_toDouble(perfume['precio_venta']).toStringAsFixed(2)}',
         ),
@@ -2026,13 +2217,26 @@ class _PedidosScreenState extends State<PedidosScreen> {
                 padding: const EdgeInsets.all(12),
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  if (_catalogo.isEmpty)
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Buscar perfume o marca',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    onChanged: (value) => setState(() => _busqueda = value),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_catalogoFiltrado.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(top: 80),
-                      child: Center(child: Text('No hay perfumes disponibles')),
+                      child: Center(
+                        child: Text('No hay perfumes que coincidan con tu busqueda'),
+                      ),
                     )
                   else
-                    ..._catalogo.map(_buildCatalogoCard),
+                    ..._catalogoFiltrado.map(_buildCatalogoCard),
                   const SizedBox(height: 8),
                   Card(
                     color: Colors.blue.shade50,

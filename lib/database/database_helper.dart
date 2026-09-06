@@ -91,6 +91,7 @@ class DatabaseHelper {
       'estado': m['estado'] ?? 'pendiente_confirmacion',
       'nombre_vendedor': m['nombre_vendedor'],
       'nombre_perfume': m['nombre_perfume'],
+      'imagen_url': m['imagen_url'] ?? m['imagen'],
     };
   }
 

@@ -217,8 +217,29 @@ class _EntregaFormState extends State<EntregaForm> {
                                       const Divider(height: 1),
                                   itemBuilder: (context, index) {
                                     final perfume = _perfumesBuscados[index];
+                                    final imagenUrl =
+                                        perfume.imagenUrl?.trim() ?? '';
                                     return ListTile(
                                       dense: true,
+                                      leading: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Container(
+                                          width: 44,
+                                          height: 44,
+                                          color: Colors.green.shade50,
+                                          child: imagenUrl.isNotEmpty
+                                              ? Image.network(
+                                                  imagenUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) =>
+                                                      Icon(Icons.local_florist,
+                                                          color: Colors
+                                                              .green.shade300),
+                                                )
+                                              : Icon(Icons.local_florist,
+                                                  color: Colors.green.shade300),
+                                        ),
+                                      ),
                                       title: Text(
                                         AppModeConfig.isColega
                                             ? perfume.nombre
@@ -245,9 +266,29 @@ class _EntregaFormState extends State<EntregaForm> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.check_circle,
-                                      color: Colors.green),
-                                  const SizedBox(width: 8),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      color: Colors.green.shade50,
+                                      child: (_perfumeSel!.imagenUrl ?? '')
+                                                  .trim()
+                                                  .isNotEmpty
+                                              ? Image.network(
+                                                  (_perfumeSel!.imagenUrl ?? '')
+                                                      .trim(),
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) =>
+                                                      Icon(Icons.local_florist,
+                                                          color: Colors
+                                                              .green.shade300),
+                                                )
+                                              : Icon(Icons.local_florist,
+                                                  color: Colors.green.shade300),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
                                       isColega

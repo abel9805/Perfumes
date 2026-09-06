@@ -112,7 +112,9 @@ class VendedorAppController extends Controller
             ->first();
 
         if (!$venta) {
-            return response()->json(['message' => 'Venta no encontrada para este vendedor'], 404);
+            return response()->json([
+                'message' => 'La venta seleccionada no existe o ya no pertenece a este vendedor',
+            ], 404);
         }
 
         $saldoActual = max(0, (float) $venta->monto_total - (float) $venta->monto_pagado);
@@ -158,13 +160,20 @@ class VendedorAppController extends Controller
             ], 422);
         }
 
-        $pago = PagoVentaVendedor::create([
-            'venta_id' => $venta->id,
-            'monto' => $montoSolicitado,
-            'fecha' => $data['fecha'] ?? Carbon::today()->toDateString(),
-            'nota' => $data['nota'] ?? null,
-            'estado' => 'pendiente_confirmacion',
-        ]);
+        try {
+            $pago = PagoVentaVendedor::create([
+                'venta_id' => $venta->id,
+                'monto' => $montoSolicitado,
+                'fecha' => $data['fecha'] ?? Carbon::today()->toDateString(),
+                'nota' => $data['nota'] ?? null,
+                'estado' => 'pendiente_confirmacion',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'No se pudo registrar el pago porque la venta asociada no existe o está inconsistente.',
+                'debug' => $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Pago enviado a confirmacion de admin',
@@ -291,7 +300,12 @@ class VendedorAppController extends Controller
                 'e.fecha',
                 'e.estado',
                 DB::raw('p.nombre as nombre_perfume'),
-            ]);
+                DB::raw('p.imagen as imagen'),
+            ])->map(function ($row) {
+                $imagen = $row->imagen ?? null;
+                $row->imagen_url = $imagen ? url('storage/' . $imagen) : null;
+                return $row;
+            });
 
         return response()->json($rows);
     }
@@ -316,7 +330,12 @@ class VendedorAppController extends Controller
                 'e.estado',
                 DB::raw('p.nombre as nombre_perfume'),
                 DB::raw('p.marca as marca_perfume'),
-            ]);
+                DB::raw('p.imagen as imagen'),
+            ])->map(function ($row) {
+                $imagen = $row->imagen ?? null;
+                $row->imagen_url = $imagen ? url('storage/' . $imagen) : null;
+                return $row;
+            });
 
         return response()->json($rows);
     }

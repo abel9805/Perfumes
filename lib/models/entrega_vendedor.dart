@@ -13,6 +13,7 @@ class EntregaVendedor {
   // Campos extra para joins (no se guardan en la BD)
   String? nombreVendedor;
   String? nombrePerfume;
+  String? imagenUrl;
 
   EntregaVendedor({
     this.id,
@@ -26,6 +27,7 @@ class EntregaVendedor {
     this.estado = 'pendiente_confirmacion',
     this.nombreVendedor,
     this.nombrePerfume,
+    this.imagenUrl,
   });
 
   double get total => cantidad * precioUnitario;
@@ -69,6 +71,11 @@ class EntregaVendedor {
       estado: map['estado'] ?? 'pendiente_confirmacion',
       nombreVendedor: map['nombre_vendedor'],
       nombrePerfume: map['nombre_perfume'],
+      imagenUrl: map['imagen_url']?.toString().isNotEmpty == true
+          ? map['imagen_url'].toString()
+          : (map['imagen']?.toString().isNotEmpty == true
+              ? map['imagen'].toString()
+              : null),
     );
   }
 }

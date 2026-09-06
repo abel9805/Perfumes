@@ -135,9 +135,29 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                 final item = entry.value;
                 final key = _itemKey(item, index);
                 final actual = _cantidadesSurtidas[key] ?? item.cantidad;
+                final imagenUrl = item.imagenUrl?.trim() ?? '';
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
                   child: ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        color: Colors.green.shade50,
+                        child: imagenUrl.isNotEmpty
+                            ? Image.network(
+                                imagenUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.local_florist,
+                                  color: Colors.green.shade700,
+                                ),
+                              )
+                            : Icon(Icons.local_florist,
+                                color: Colors.green.shade700),
+                      ),
+                    ),
                     title: Text(item.nombrePerfume ?? 'Perfume'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

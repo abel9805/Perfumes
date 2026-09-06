@@ -209,14 +209,30 @@ class _EntregasScreenState extends State<EntregasScreen> {
         items.fold<int>(0, (sum, item) => sum + item.cantidad);
     final totalImporte = items.fold<double>(0, (sum, item) => sum + item.total);
 
+    final imagenUrl = first.imagenUrl?.trim() ?? '';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         onTap: puedeSurtir ? () => _abrirPedidoGrupo(key, items, fmt) : null,
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue.shade100,
-          child: Icon(Icons.local_shipping, color: Colors.blue.shade700),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: 48,
+            height: 48,
+            color: Colors.blue.shade50,
+            child: imagenUrl.isNotEmpty
+                ? Image.network(
+                    imagenUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.local_shipping,
+                      color: Colors.blue.shade700,
+                    ),
+                  )
+                : Icon(Icons.local_shipping, color: Colors.blue.shade700),
+          ),
         ),
         title: Text(
           _pedidoTitulo(key, items),
@@ -275,21 +291,15 @@ class _EntregasScreenState extends State<EntregasScreen> {
   }
 
   Future<void> _delete(EntregaVendedor e) async {
-    if (e.estado == 'confirmado' || e.estado == 'pagado') {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se puede eliminar una entrega confirmada o pagada'),
-        ),
-      );
-      return;
-    }
-
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmar'),
-        content: const Text('¿Eliminar esta entrega? El stock será revertido.'),
+        content: Text(
+          e.estado == 'pagado'
+              ? '¿Eliminar esta entrega ya confirmada/pagada? Se quitará del registro y se revertirá la cantidad.'
+              : '¿Eliminar esta entrega? El stock será revertido.',
+        ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -325,6 +335,60 @@ class _EntregasScreenState extends State<EntregasScreen> {
     }
   }
 
+  void _mostrarImagenGrande(String title, String imageUrl) {
+    if (imageUrl.trim().isEmpty) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                onPressed: () => Navigator.pop(ctx),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 420),
+              child: InteractiveViewer(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    padding: const EdgeInsets.all(24),
+                    color: Colors.indigo.shade50,
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 72,
+                      color: Colors.indigo.shade700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEntregaCard(EntregaVendedor e, DateFormat fmt) {
     final esPedido = widget.modoPedidos;
     final esInicial = e.tipo == 'inicial';
@@ -341,6 +405,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
             : e.estado == 'confirmado'
                 ? 'Confirmado'
                 : e.estado);
+    final imagenUrl = e.imagenUrl?.trim() ?? '';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -349,13 +414,28 @@ class _EntregasScreenState extends State<EntregasScreen> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundColor:
-                  esInicial ? Colors.purple.shade100 : Colors.green.shade100,
-              child: Icon(
-                esInicial ? Icons.inventory_2 : Icons.delivery_dining,
-                color:
-                    esInicial ? Colors.purple.shade700 : Colors.green.shade700,
+            GestureDetector(
+              onTap: () => _mostrarImagenGrande(e.nombrePerfume ?? 'Perfume', imagenUrl),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  color: Colors.indigo.shade50,
+                  child: imagenUrl.isNotEmpty
+                      ? Image.network(
+                          imagenUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Icon(
+                            esInicial ? Icons.inventory_2 : Icons.delivery_dining,
+                            color: Colors.indigo.shade700,
+                          ),
+                        )
+                      : Icon(
+                          esInicial ? Icons.inventory_2 : Icons.delivery_dining,
+                          color: Colors.indigo.shade700,
+                        ),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -399,7 +479,7 @@ class _EntregasScreenState extends State<EntregasScreen> {
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
-                if (e.estado != 'confirmado' && e.estado != 'pagado')
+                if (!widget.modoPedidos)
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red, size: 20),
                     onPressed: () => _delete(e),
